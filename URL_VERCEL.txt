@@ -1,0 +1,43 @@
+========================================
+  INSTRUCCIONES: URL DE VERCEL
+========================================
+
+Después de desplegar en Vercel, obtendrás una URL como:
+
+  https://manos-a-la-obra-ventas.vercel.app
+
+O si usas un dominio personalizado:
+
+  https://ventas.tudominio.com
+
+========================================
+  PASOS PARA ACTUALIZAR EL ENLACE
+========================================
+
+1. Despliega en Vercel siguiendo INICIO_RAPIDO_VERCEL.md
+
+2. Copia la URL que te da Vercel
+
+3. Abre manosalaobra.html (línea 67)
+
+4. Reemplaza "TU-URL-VERCEL" con tu URL real:
+
+   ANTES:
+   <a href="https://TU-URL-VERCEL.vercel.app" ...>
+
+   DESPUÉS:
+   <a href="https://manos-a-la-obra-ventas.vercel.app" ...>
+
+5. Guarda el archivo
+
+6. Sube manosalaobra.html a tu cPanel
+
+========================================
+  GUARDA TU URL AQUÍ
+========================================
+
+Mi URL de Vercel es:
+
+[Escribe tu URL aquí después de desplegar]
+
+========================================

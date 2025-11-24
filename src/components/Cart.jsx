@@ -36,49 +36,62 @@ const Cart = ({ isOpen, onClose, cart, onUpdateQuantity, onRemove, onCheckout, t
                     ) : (
                         <div className="space-y-4">
                             {cart.map((item) => (
-                                <div key={item.id} className="glass p-4 rounded-xl flex items-center space-x-4">
-                                    <img
-                                        src={item.image}
-                                        alt={item.name}
-                                        className="w-20 h-20 object-cover rounded-lg"
-                                        onError={(e) => {
-                                            e.target.src = '/images/logo-mao.png';
-                                        }}
-                                    />
+                                <div key={item.id} className="glass p-4 rounded-xl">
+                                    {/* Layout para móvil y desktop */}
+                                    <div className="flex items-start space-x-3">
+                                        <img
+                                            src={item.image}
+                                            alt={item.name}
+                                            className="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded-lg flex-shrink-0"
+                                            onError={(e) => {
+                                                e.target.src = '/images/logo-mao.png';
+                                            }}
+                                        />
 
-                                    <div className="flex-1">
-                                        <h3 className="font-semibold text-white">{item.name}</h3>
-                                        <p className="text-secondary-400 font-bold">Q{item.price.toLocaleString()}</p>
+                                        <div className="flex-1 min-w-0">
+                                            {/* Nombre y precio */}
+                                            <div className="flex items-start justify-between mb-2">
+                                                <div className="flex-1 min-w-0 pr-2">
+                                                    <h3 className="font-semibold text-white text-sm sm:text-base truncate">{item.name}</h3>
+                                                    <p className="text-secondary-400 font-bold text-sm">Q{item.price.toLocaleString()}</p>
+                                                </div>
+
+                                                {/* Botón eliminar - siempre visible */}
+                                                <button
+                                                    onClick={() => onRemove(item.id)}
+                                                    className="p-2 text-red-400 hover:bg-red-500/20 rounded-lg transition-colors duration-200 flex-shrink-0"
+                                                    title="Eliminar"
+                                                >
+                                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                    </svg>
+                                                </button>
+                                            </div>
+
+                                            {/* Controles de cantidad y subtotal */}
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center space-x-2">
+                                                    <button
+                                                        onClick={() => onUpdateQuantity(item.id, item.quantity - 1)}
+                                                        className="w-7 h-7 sm:w-8 sm:h-8 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors duration-200 text-sm"
+                                                    >
+                                                        -
+                                                    </button>
+                                                    <span className="w-8 sm:w-12 text-center font-semibold text-white text-sm">{item.quantity}</span>
+                                                    <button
+                                                        onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
+                                                        className="w-7 h-7 sm:w-8 sm:h-8 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors duration-200 text-sm"
+                                                    >
+                                                        +
+                                                    </button>
+                                                </div>
+
+                                                <div className="text-right">
+                                                    <p className="font-bold text-white text-sm sm:text-base">Q{(item.price * item.quantity).toLocaleString()}</p>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
-
-                                    <div className="flex items-center space-x-2">
-                                        <button
-                                            onClick={() => onUpdateQuantity(item.id, item.quantity - 1)}
-                                            className="w-8 h-8 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors duration-200"
-                                        >
-                                            -
-                                        </button>
-                                        <span className="w-12 text-center font-semibold text-white">{item.quantity}</span>
-                                        <button
-                                            onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
-                                            className="w-8 h-8 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors duration-200"
-                                        >
-                                            +
-                                        </button>
-                                    </div>
-
-                                    <div className="text-right">
-                                        <p className="font-bold text-white">Q{(item.price * item.quantity).toLocaleString()}</p>
-                                    </div>
-
-                                    <button
-                                        onClick={() => onRemove(item.id)}
-                                        className="p-2 text-red-400 hover:bg-red-500/20 rounded-lg transition-colors duration-200"
-                                    >
-                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                        </svg>
-                                    </button>
                                 </div>
                             ))}
                         </div>

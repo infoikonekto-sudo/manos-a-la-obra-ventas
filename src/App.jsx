@@ -81,6 +81,56 @@ function App() {
         }
     };
 
+    const handleRemoveFromCart = async (productId) => {
+        try {
+            // Encontrar el producto en el carrito
+            const cartItem = cart.find(item => item.id === productId);
+            if (!cartItem) return;
+
+            // Devolver el stock a Supabase
+            const product = products.find(p => p.id === productId);
+            if (product) {
+                const newStock = product.stock + cartItem.quantity;
+                await updateProductStock(productId, newStock);
+            }
+
+            // Eliminar del carrito local
+            removeFromCart(productId);
+        } catch (error) {
+            console.error('Error al eliminar del carrito:', error);
+            alert('Error al eliminar del carrito. Por favor intenta de nuevo.');
+        }
+    };
+
+    const handleUpdateQuantity = async (productId, newQuantity) => {
+        try {
+            const cartItem = cart.find(item => item.id === productId);
+            if (!cartItem) return;
+
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+
+            // Calcular diferencia de cantidad
+            const quantityDifference = newQuantity - cartItem.quantity;
+
+            // Verificar si hay suficiente stock
+            if (quantityDifference > 0 && quantityDifference > product.stock) {
+                alert('No hay suficiente stock disponible');
+                return;
+            }
+
+            // Actualizar stock en Supabase
+            const newStock = product.stock - quantityDifference;
+            await updateProductStock(productId, newStock);
+
+            // Actualizar cantidad en carrito local
+            updateQuantity(productId, newQuantity);
+        } catch (error) {
+            console.error('Error al actualizar cantidad:', error);
+            alert('Error al actualizar cantidad. Por favor intenta de nuevo.');
+        }
+    };
+
     const handleCheckout = () => {
         setIsCartOpen(false);
         setIsCheckoutOpen(true);
@@ -132,8 +182,8 @@ function App() {
                 isOpen={isCartOpen}
                 onClose={() => setIsCartOpen(false)}
                 cart={cart}
-                onUpdateQuantity={updateQuantity}
-                onRemove={removeFromCart}
+                onUpdateQuantity={handleUpdateQuantity}
+                onRemove={handleRemoveFromCart}
                 onCheckout={handleCheckout}
                 total={getTotal()}
             />

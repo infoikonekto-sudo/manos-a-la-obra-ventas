@@ -51,29 +51,45 @@ function App() {
         }
     };
 
+    const handleAddToCart = async (product) => {
+        // Verificar si hay stock disponible
+        if (product.stock <= 0) {
+            alert('Producto agotado');
+            return;
+        }
+
+        // Verificar cuántos ya hay en el carrito
+        const cartItem = cart.find(item => item.id === product.id);
+        const quantityInCart = cartItem ? cartItem.quantity : 0;
+
+        // Verificar si agregar uno más excedería el stock
+        if (quantityInCart + 1 > product.stock) {
+            alert('No hay suficiente stock disponible');
+            return;
+        }
+
+        try {
+            // Actualizar stock en Supabase INMEDIATAMENTE
+            const newStock = product.stock - 1;
+            await updateProductStock(product.id, newStock);
+
+            // Agregar al carrito local
+            addToCart(product);
+        } catch (error) {
+            console.error('Error al reservar producto:', error);
+            alert('Error al agregar al carrito. Por favor intenta de nuevo.');
+        }
+    };
+
     const handleCheckout = () => {
         setIsCartOpen(false);
         setIsCheckoutOpen(true);
     };
 
-    const handlePurchaseCompleted = async () => {
-        try {
-            // Actualizar stock en Supabase
-            const updatePromises = cart.map(async (cartItem) => {
-                const product = products.find(p => p.id === cartItem.id);
-                if (product) {
-                    const newStock = product.stock - cartItem.quantity;
-                    await updateProductStock(cartItem.id, newStock);
-                }
-            });
-
-            await Promise.all(updatePromises);
-            clearCart();
-            setIsCheckoutOpen(false);
-        } catch (error) {
-            console.error('Error updating stock:', error);
-            alert('Error al procesar la compra. Por favor intenta de nuevo.');
-        }
+    const handlePurchaseCompleted = () => {
+        // Solo limpiar el carrito, el stock ya fue actualizado al agregar al carrito
+        clearCart();
+        setIsCheckoutOpen(false);
     };
 
     return (
@@ -102,7 +118,7 @@ function App() {
                                 <ProductCard
                                     key={product.id}
                                     product={product}
-                                    onAddToCart={addToCart}
+                                    onAddToCart={handleAddToCart}
                                 />
                             ))}
                         </div>

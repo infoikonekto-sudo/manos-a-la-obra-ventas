@@ -42,7 +42,6 @@ const AdminPanel = ({ isOpen, onClose, isAuthenticated, onLogin, onLogout, produ
         e.preventDefault();
         onAddProduct({
             ...newProduct,
-            id: Date.now(),
             price: parseFloat(newProduct.price),
             stock: parseInt(newProduct.stock)
         });
@@ -51,7 +50,11 @@ const AdminPanel = ({ isOpen, onClose, isAuthenticated, onLogin, onLogout, produ
 
     const handleUpdateProduct = (e) => {
         e.preventDefault();
-        onUpdateProduct(editingProduct);
+        const { id, ...productData } = editingProduct;
+        // Convertir price y stock a números
+        productData.price = parseFloat(productData.price);
+        productData.stock = parseInt(productData.stock);
+        onUpdateProduct({ id, ...productData });
         setEditingProduct(null);
     };
 

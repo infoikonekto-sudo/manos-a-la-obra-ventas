@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Header from './components/Header';
 import Hero from './components/Hero';
 import ProductCard from './components/ProductCard';
@@ -8,13 +8,11 @@ import AdminPanel from './components/AdminPanel';
 import Footer from './components/Footer';
 import { useCart } from './hooks/useCart';
 import { useAuth } from './hooks/useAuth';
-import { INITIAL_PRODUCTS } from './utils/constants';
+import { useProducts } from './hooks/useProducts';
+import { updateProductStock } from './services/supabaseService';
 
 function App() {
-    const [products, setProducts] = useState(() => {
-        const savedProducts = localStorage.getItem('products');
-        return savedProducts ? JSON.parse(savedProducts) : INITIAL_PRODUCTS;
-    });
+    const { products, loading, error, addProduct, updateProduct, deleteProduct } = useProducts();
 
     const [isCartOpen, setIsCartOpen] = useState(false);
     const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
@@ -23,21 +21,33 @@ function App() {
     const { cart, addToCart, updateQuantity, removeFromCart, clearCart, getTotal, getTotalItems } = useCart();
     const { isAuthenticated, login, logout } = useAuth();
 
-    useEffect(() => {
-        localStorage.setItem('products', JSON.stringify(products));
-    }, [products]);
-
-    const handleAddProduct = (product) => {
-        setProducts([...products, product]);
+    const handleAddProduct = async (product) => {
+        try {
+            await addProduct(product);
+        } catch (error) {
+            console.error('Error adding product:', error);
+            alert('Error al agregar producto');
+        }
     };
 
-    const handleUpdateProduct = (updatedProduct) => {
-        setProducts(products.map(p => p.id === updatedProduct.id ? updatedProduct : p));
+    const handleUpdateProduct = async (updatedProduct) => {
+        try {
+            const { id, ...productData } = updatedProduct;
+            await updateProduct(id, productData);
+        } catch (error) {
+            console.error('Error updating product:', error);
+            alert('Error al actualizar producto');
+        }
     };
 
-    const handleDeleteProduct = (productId) => {
+    const handleDeleteProduct = async (productId) => {
         if (confirm('¿Estás seguro de eliminar este producto?')) {
-            setProducts(products.filter(p => p.id !== productId));
+            try {
+                await deleteProduct(productId);
+            } catch (error) {
+                console.error('Error deleting product:', error);
+                alert('Error al eliminar producto');
+            }
         }
     };
 
@@ -46,20 +56,24 @@ function App() {
         setIsCheckoutOpen(true);
     };
 
-    const handlePurchaseCompleted = () => {
-        // Actualizar stock localmente
-        const updatedProducts = products.map(product => {
-            const cartItem = cart.find(item => item.id === product.id);
-            if (cartItem) {
-                return { ...product, stock: product.stock - cartItem.quantity };
-            }
-            return product;
-        });
+    const handlePurchaseCompleted = async () => {
+        try {
+            // Actualizar stock en Supabase
+            const updatePromises = cart.map(async (cartItem) => {
+                const product = products.find(p => p.id === cartItem.id);
+                if (product) {
+                    const newStock = product.stock - cartItem.quantity;
+                    await updateProductStock(cartItem.id, newStock);
+                }
+            });
 
-        setProducts(updatedProducts);
-        localStorage.setItem('products', JSON.stringify(updatedProducts));
-        clearCart();
-        setIsCheckoutOpen(false);
+            await Promise.all(updatePromises);
+            clearCart();
+            setIsCheckoutOpen(false);
+        } catch (error) {
+            console.error('Error updating stock:', error);
+            alert('Error al procesar la compra. Por favor intenta de nuevo.');
+        }
     };
 
     return (
